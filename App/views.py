@@ -13,29 +13,49 @@ import math
 import uuid
 
 
-FROM_EMAIL = 'khairnaryogesh259@gmail.com'
-EMAIL_PASSWORD = 'lwcd rxpf pmsk hmzo'
-def send_email_to_support(tomail , otp):
+# FROM_EMAIL = 'khairnaryogesh259@gmail.com'
+# EMAIL_PASSWORD = ''
+# def send_email_to_support(tomail , otp):
+# 	try:
+# 		print(tomail , otp ,'oooooo')
+# 		subject = f"document editor Login OTP"
+# 		msg_body = f"<p>Your Login OTP is <strong>{otp}</strong>. Please do not share with anyone.</p>"
+# 		msg = MIMEMultipart()
+# 		msg['Subject'] = subject
+# 		msg['From']    = FROM_EMAIL
+# 		msg['To']      = tomail
+# 		msg.attach(MIMEText(msg_body, 'html'))
+# 		'''Connect smtp server'''
+# 		server = smtplib.SMTP('smtp.gmail.com',587)
+# 		server.starttls()
+# 		server.login(FROM_EMAIL , EMAIL_PASSWORD)
+# 		server.sendmail(FROM_EMAIL, tomail, msg.as_string())
+# 		print('mailsent')
+# 		server.close()
+# 		return True
+# 	except Exception as exp:
+# 		return False
+
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+SENDGRID_API_KEY = "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"
+
+def send_email_to_support(tomail, otp):
 	try:
-		print(tomail , otp ,'oooooo')
-		subject = f"document editor Login OTP"
-		msg_body = f"<p>Your Login OTP is <strong>{otp}</strong>. Please do not share with anyone.</p>"
-		msg = MIMEMultipart()
-		msg['Subject'] = subject
-		msg['From']    = FROM_EMAIL
-		msg['To']      = tomail
-		msg.attach(MIMEText(msg_body, 'html'))
-		'''Connect smtp server'''
-		server = smtplib.SMTP('smtp.gmail.com',587)
-		server.starttls()
-		server.login(FROM_EMAIL , EMAIL_PASSWORD)
-		server.sendmail(FROM_EMAIL, tomail, msg.as_string())
-		print('mailsent')
-		server.close()
+		message = Mail(
+			from_email='studentrnt@gmail.com',
+			to_emails=tomail,
+			subject='Document Editor Login OTP',
+			html_content=f"<p>Your Login OTP is <strong>{otp}</strong>.</p>"
+		)
+		sg = SendGridAPIClient(SENDGRID_API_KEY)
+		response = sg.send(message)
+		print("Email sent:", response.status_code)
 		return True
-	except Exception as exp:
+	except Exception as e:
+		print("SendGrid failed:", str(e))
 		return False
-	
 
 globle_otp_dict = {}
 session_stored_uuid = {}
