@@ -17,8 +17,9 @@ FROM_EMAIL = 'khairnaryogesh259@gmail.com'
 EMAIL_PASSWORD = 'lwcd rxpf pmsk hmzo'
 def send_email_to_support(tomail , otp):
 	try:
+		print(tomail , otp ,'oooooo')
 		subject = f"document editor Login OTP"
-		msg_body = f'Your Login OTP is {otp}\n please Do not share anyone'
+		msg_body = f"<p>Your Login OTP is <strong>{otp}</strong>. Please do not share with anyone.</p>"
 		msg = MIMEMultipart()
 		msg['Subject'] = subject
 		msg['From']    = FROM_EMAIL
@@ -29,6 +30,8 @@ def send_email_to_support(tomail , otp):
 		server.starttls()
 		server.login(FROM_EMAIL , EMAIL_PASSWORD)
 		server.sendmail(FROM_EMAIL, tomail, msg.as_string())
+		print('mailsent')
+		server.close()
 		return True
 	except Exception as exp:
 		return False
