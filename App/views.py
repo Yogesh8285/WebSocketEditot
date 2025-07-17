@@ -14,7 +14,7 @@ import uuid
 
 
 FROM_EMAIL = 'khairnaryogesh259@gmail.com'
-EMAIL_PASSWORD = ''
+EMAIL_PASSWORD = 'lwcd rxpf pmsk hmzo'
 def send_email_to_support(tomail , otp):
 	try:
 		subject = f"document editor Login OTP"
@@ -25,7 +25,7 @@ def send_email_to_support(tomail , otp):
 		msg['To']      = tomail
 		msg.attach(MIMEText(msg_body, 'html'))
 		'''Connect smtp server'''
-		server = smtplib.SMTP('smtp.office365.com',587)
+		server = smtplib.SMTP('smtp.gmail.com',587)
 		server.starttls()
 		server.login(FROM_EMAIL , EMAIL_PASSWORD)
 		server.sendmail(FROM_EMAIL, tomail, msg.as_string())
