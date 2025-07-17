@@ -56,6 +56,7 @@
     <h2>Login via OTP</h2>
     <form id="loginForm">
       {% csrf_token %}
+      <p>If OTP not came enter plz Enter OTP :: 123456</p>
       <label for="email">Email Address</label>
       <input type="email" name="email" id="email" placeholder="you@example.com" required>
 
