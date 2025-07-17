@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title> Doc Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+    .suggestion-box {
+        width: 400px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+        margin-top: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .suggestion-box h3 {
+        margin-top: 0;
+        font-size: 18px;
+        color: #444;
+    }
+
+    #suggestionList {
+        list-style: decimal;
+        padding-left: 20px;
+        font-family: Arial, sans-serif;
+        color: #222;
+    }
+
+    .document-dropdown {
+        padding: 10px 14px;
+        font-size: 16px;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        background-color: #ffffff;
+        color: #007bff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .document-dropdown:hover {
+        border-color: #0056b3;
+        color: #0056b3;
+        background-color: #f0f8ff;
+    }
+
+    .document-dropdown:focus {
+        outline: none;
+        box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+    }
+</style>
+
+<body class="bg-gradient-to-br from-blue-50 to-white min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <h3 class="text-3xl font-bold text-center text-blue-300">Welcome, {{ User }}</h3>
+        <h1 class="text-3xl font-bold text-center text-blue-600">📝 Document Editor</h1>
+        <div class="suggestion-box" id="suggestionBox">
+            <p id="suggestionList">suggestion list</p>
+        </div>
+        <div class="flex gap-2">
+            <select class="document-dropdown" id="docId" required>
+                <option value="Select Document" disabled selected>Select Document</option>
+                <option value="doc1">Document 1</option>
+                <option value="doc2">Document 2</option>
+            </select>
+
+            <button onclick="connect()"
+                class="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition">
+                🔗 Connect
+            </button>
+        </div>
+        <textarea id="editor" rows="20" placeholder="Start typing..."
+            class="w-full p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 shadow-inner text-lg font-mono"></textarea>
+
+        <div id="status" class="text-center text-sm text-gray-600">🔌 Not connected</div>
+    </div>
+
+    <script>
+        let socket = null;
+
+        function connect() {
+            let typingTimer;
+            // const docId = document.getElementById("docId").value.trim();
+            const docId = document.getElementById("docId").value;
+            const editor = document.getElementById("editor");
+            const status = document.getElementById("status");
+            const suggestionBox = document.getElementById("suggestionList");
+            let remote = false;
+
+            if (!docId) {
+                alert("Please select a document ID.");
+                return;
+            }
+
+            socket = new WebSocket("ws://127.0.0.1:8000/ws/editor/" + docId);
+
+            socket.onopen = () => {
+                status.innerHTML = `Connected to <strong>${docId}</strong>`;
+                status.classList.replace("text-gray-600", "text-green-600");
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === "update") {
+                    remote = true;
+                    editor.value = data.content;
+                }
+                suggestionBox.innerHTML = ''
+            };
+
+            socket.onclose = () => {
+                status.innerHTML = "XX Disconnected XX";
+                status.classList.replace("text-green-600", "text-red-600");
+            };
+
+            editor.addEventListener("input", () => {
+                if (!remote && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: "update",
+                        content: editor.value
+                    }));
+                    typingTimer = setTimeout(() => {
+                        sendForSuggestions(editor.value);
+                    }, 1000);
+                }
+                remote = false;
+            });
+            function sendForSuggestions(text) {
+                fetch('ai/suggest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ text })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        suggestionBox.innerHTML = '';
+                        if (data.matches && data.matches.length > 0) {
+                            data.matches.forEach(match => {
+                                const message = document.createElement("p");
+                                message.textContent = `${match.replacements.map(r => r.value).join(', ')}`;
+                                suggestionBox.appendChild(message);
+                            });
+                        } else {
+                            suggestionBox.innerHTML = "<p>✅ No suggestions found.</p>";
+                        }
+                    });
+            }
+
+            function getCSRFToken() {
+                return document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
+            }
+        }
+    </script>
+
+</body>
+
+</html>

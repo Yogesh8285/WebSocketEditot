@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f9fc;
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .otp-box {
+      display: none;
+    }
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0984e3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Login via OTP</h2>
+    <form id="loginForm">
+      {% csrf_token %}
+      <label for="email">Email Address</label>
+      <input type="email" name="email" id="email" placeholder="you@example.com" required>
+
+      <div class="otp-box" id="otpSection">
+        <label for="otp">Enter OTP</label>
+        <input type="text" name="otp" id="otp" placeholder="123456">
+        <div id="otpError" class="error"></div>
+      </div>
+
+      <button type="submit" id="submitBtn">Send OTP</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const otpSection = document.getElementById("otpSection");
+    const submitBtn = document.getElementById("submitBtn");
+    const otpError = document.getElementById("otpError");
+    let step = 1;
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+
+      if (step === 1) {
+        // Send OTP
+        fetch("app/gentotp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: `email=${encodeURIComponent(email)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "sent") {
+            otpSection.style.display = "block";
+            submitBtn.textContent = "Verify OTP";
+            step = 2;
+          } else {
+            alert("Failed to send OTP.");
+          }
+        });
+      } else {
+        // Verify OTP
+        const otp = document.getElementById("otp").value;
+        fetch("app/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: `email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            var uuid =data.uuid
+            window.location.href = "app/homepage/"+uuid;  // redirect to homepage
+          } else {
+            otpError.textContent = "Invalid OTP. Please try again.";
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
