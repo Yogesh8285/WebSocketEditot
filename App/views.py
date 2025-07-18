@@ -103,7 +103,7 @@ def homepage(request,uuid):
 	return redirect("loginpage")
 
 
-# @csrf_exempt
+@csrf_exempt
 def ai_suggestion_view(request):
 	if request.method == 'POST':
 		data = json.loads(request.body)
