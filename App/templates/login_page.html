@@ -84,7 +84,7 @@
 
       if (step === 1) {
         // Send OTP
-        fetch("app/gentotp", {
+        fetch("gentotp", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -105,7 +105,7 @@
       } else {
         // Verify OTP
         const otp = document.getElementById("otp").value;
-        fetch("app/login", {
+        fetch("login", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
