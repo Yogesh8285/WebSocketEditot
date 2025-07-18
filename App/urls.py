@@ -18,9 +18,9 @@ from django.urls import path,include
 
 urlpatterns = [
     path('', views.loginpage ,  name='loginpage'),
-    path('/homepage/ai/suggest', views.ai_suggestion_view),
-    path('/gentotp', views.gentotp, name='gentotp'),
-    path('/login', views.login ),
-    path("/homepage/<uuid>", views.homepage, name="homepage"),
+    path('homepage/ai/suggest', views.ai_suggestion_view),
+    path('gentotp', views.gentotp, name='gentotp'),
+    path('login', views.login ),
+    path("homepage/<uuid>", views.homepage, name="homepage"),
 
 ]
