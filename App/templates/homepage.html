@@ -152,18 +152,9 @@
                     });
             }
 
-        function getCSRFToken() {
-            let csrfToken = null;
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'csrftoken') {
-                    csrfToken = decodeURIComponent(value);
-                    break;
-                }
+            function getCSRFToken() {
+                return document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
             }
-            return csrfToken;
-        }
         }
     </script>
 
