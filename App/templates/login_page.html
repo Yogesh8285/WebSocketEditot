@@ -117,7 +117,7 @@
         .then(data => {
           if (data.status === "success") {
             var uuid =data.uuid
-            window.location.href = "app/homepage/"+uuid;  // redirect to homepage
+            window.location.href = "/homepage/"+uuid;  // redirect to homepage
           } else {
             otpError.textContent = "Invalid OTP. Please try again.";
           }
