@@ -95,7 +95,7 @@
                 return;
             }
 
-            socket = new WebSocket("ws://127.0.0.1:8000/ws/editor/" + docId);
+            socket = new WebSocket("wss://websocketeditot.onrender.com/ws/editor/" + docId);
 
             socket.onopen = () => {
                 status.innerHTML = `Connected to <strong>${docId}</strong>`;
